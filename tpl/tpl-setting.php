@@ -15,7 +15,7 @@
                 <tr valign="top">
                     <th scope="row"><label>显示设置</label></th>
                     <td>
-                        <ul class="wpd-color-ul">
+                        <ul class="wpn-color-ul">
                             <?php $color = array(
                                 array(
                                     'title' => '帐号ID',
@@ -31,15 +31,25 @@
                                     'title' => 'TMDB API Key',
                                     'key' => 'api_key',
                                     'default' => ''
+                                ),
+                                array(
+                                    'title' => 'NeoDB 实例地址',
+                                    'key' => 'neodb_url',
+                                    'default' => 'https://neodb.social'
+                                ),
+                                array(
+                                    'title' => 'NeoDB Token (可选)',
+                                    'key' => 'neodb_token',
+                                    'default' => ''
                                 )
                             );
                             foreach ($color as $key => $V) {
-                            ?>
-                                <li class="wpd-color-li">
-                                    <code><?php echo $V['title']; ?></code>
-                                    <?php $color = db_get_setting($V['key']) ? db_get_setting($V['key']) : $V['default']; ?>
-                                    <input name="<?php echo db_setting_key($V['key']); ?>" type="text" value="<?php echo $color; ?>" class="regular-text wpd-color-picker" />
-                                </li>
+                                ?>
+                            <li class="wpn-color-li">
+                                <code><?php echo $V['title']; ?></code>
+                                <?php $color = db_get_setting($V['key']) ? db_get_setting($V['key']) : $V['default']; ?>
+                                    <input name="<?php echo db_setting_key($V['key']); ?>" type="text" value="<?php echo $color; ?>" class="regular-text wpn-color-picker" />
+                            </li>
                             <?php }
                             ?>
                         </ul>
@@ -50,7 +60,7 @@
                 <tr valign="top">
                     <th scope="row">
                         <label for="<?php echo db_setting_key('dark_mode');
-                                    $mode = db_get_setting("dark_mode") ? db_get_setting("dark_mode") : 'light'; ?>">暗黑模式</label>
+                            $mode = db_get_setting("dark_mode") ? db_get_setting("dark_mode") : 'light'; ?>">暗黑模式</label>
                     </th>
                     <td>
                         <label for="mode-light">
@@ -64,7 +74,7 @@
                 <tr valign="top">
                     <th scope="row"><label for="url">自定义CSS</label></th>
                     <td>
-                        <textarea name="<?php echo db_setting_key('css'); ?>" class="wpd-textarea"><?php echo db_get_setting('css'); ?></textarea>
+                        <textarea name="<?php echo db_setting_key('css'); ?>" class="wpn-textarea"><?php echo db_get_setting('css'); ?></textarea>
                         <p class="description">请输入合法的CSS。</p>
                     </td>
                 </tr>
@@ -133,25 +143,25 @@
                 </tr>
             </tbody>
         </table>
-        <div class="wpd-submit-form">
-            <input type="submit" class="button-primary" name="save" value="<?php _e('Save Changes') ?>" />
+        <div class="wpn-submit-form">
+            <input type="submit" class="button-primary" name="save" value="<?php _e('保存') ?>" />
         </div>
     </form>
     <style>
-        .wpd-color-li {
-            position: relative;
-            padding-left: 120px;
-        }
+    .wpn-color-li {
+        position: relative;
+        padding-left: 160px;
+    }
 
-        .wpd-color-li code {
-            position: absolute;
-            left: 0;
-            top: 1px;
-        }
+    .wpn-color-li code {
+        position: absolute;
+        left: 0;
+        top: 1px;
+    }
 
-        .wpd-textarea {
-            width: 600px;
-            height: 120px;
-        }
+    .wpn-textarea {
+        width: 600px;
+        height: 120px;
+    }
     </style>
 </div>

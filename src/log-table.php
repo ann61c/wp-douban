@@ -32,10 +32,10 @@ class Log_Table extends \WP_List_Table
     public function __construct()
     {
         parent::__construct(array(
-            'singular' => 'wp-douban',
-            'plural'   => 'wp-doubans',
+            'singular' => 'wp-neodb',
+            'plural'   => 'wp-neodbs',
             'ajax'     => false,
-            'screen'   => 'wp-douban',
+            'screen'   => 'wp-neodb',
         ));
     }
 
@@ -59,10 +59,24 @@ class Log_Table extends \WP_List_Table
         global $wpdb;
 
         $currentPage = $this->get_pagenum();
-
         $offset = ($currentPage - 1) * 40;
 
-        $subjects = $wpdb->get_results("SELECT * FROM $wpdb->douban_log ORDER BY create_time DESC LIMIT 40 OFFSET {$offset}");
+        // Sorting
+        $orderby = !empty($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'create_time';
+        $order = !empty($_GET['order']) ? strtolower(sanitize_text_field($_GET['order'])) : 'desc';
+
+        // Whitelist orderby
+        $sortable = $this->get_sortable_columns();
+        if (!array_key_exists($orderby, $sortable)) {
+            $orderby = 'create_time';
+        }
+
+        // Validate order
+        if (!in_array($order, ['asc', 'desc'])) {
+            $order = 'desc';
+        }
+
+        $subjects = $wpdb->get_results("SELECT * FROM $wpdb->douban_log ORDER BY {$orderby} {$order} LIMIT 40 OFFSET {$offset}");
 
         $this->items = $subjects;
 
@@ -70,6 +84,17 @@ class Log_Table extends \WP_List_Table
             'total_items' => $this->get_subject_count(),
             'per_page'    => 40,
         ));
+    }
+
+    public function get_sortable_columns()
+    {
+        return array(
+            'type'        => array('type', false),
+            'action'      => array('action', false),
+            'status'      => array('status', false),
+            'create_time' => array('create_time', true),
+            'account_id'  => array('account_id', false),
+        );
     }
 
 
@@ -84,12 +109,37 @@ class Log_Table extends \WP_List_Table
     {
         switch ($column_name) {
             case 'type':
-            case 'action':
+                $type_labels = [
+                    'batch' => '批量',
+                    'movie' => '电影',
+                    'book' => '图书',
+                    'music' => '音乐',
+                    'game' => '游戏',
+                    'drama' => '舞台剧',
+                    'podcast' => '播客',
+                ];
+                return $type_labels[$item->type] ?? $item->type;
             case 'status':
             case 'message':
-            case 'create_time':
             case 'account_id':
                 return $item->$column_name;
+            case 'create_time':
+                return wp_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($item->create_time));
+
+            case 'source':
+                $source_labels = [
+                    'douban' => '豆瓣',
+                    'tmdb' => 'TMDB',
+                    'neodb' => 'NeoDB',
+                ];
+                return $source_labels[$item->source] ?? '豆瓣';
+
+            case 'action':
+                $action_labels = [
+                    'sync' => '同步',
+                    'embed' => '嵌入',
+                ];
+                return $action_labels[$item->action] ?? $item->action;
 
             default:
                 return print_r($item, true);
@@ -100,10 +150,10 @@ class Log_Table extends \WP_List_Table
     {
         $link = array(
             'page'                  => 'log',
-            'wpd_action'       => 'empty_log',
+            'wpn_action'       => 'empty_log',
         );
         $link = add_query_arg($link, admin_url('admin.php'));
-        $link = wp_nonce_url($link, "wpd_empty_log");
+        $link = wp_nonce_url($link, "wpn_empty_log");
 
 
         printf(
@@ -138,6 +188,7 @@ class Log_Table extends \WP_List_Table
     {
         return array(
             'type'     => '类型',
+            'source' => '来源',
             'action' => '操作',
             'status' => '状态',
             'message' => '备注',
